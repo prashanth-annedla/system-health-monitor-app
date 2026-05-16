@@ -5,3 +5,8 @@ pydantic
 pytest
 pytest-asyncio
 httpx
+structlog
+debugpy
+prometheus-fastapi-instrumentator>=7.0.0
+opentelemetry-sdk>=1.24.0
+opentelemetry-instrumentation-fastapi>=0.45b0
