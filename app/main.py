@@ -8,6 +8,8 @@ from app.models import (
     HealthEvent,
 )
 from typing import Dict, Optional
+import os
+import sys
 import networkx as nx
 from app.events import create_event_bus, process_event, LocalEventBus
 import asyncio
@@ -47,17 +49,22 @@ log = structlog.get_logger()
 
 
 # OpenTelemetry
+_DISABLE_OTEL = os.getenv("DISABLE_OPENTELEMETRY", "0") == "1" or any("pytest" in arg for arg in sys.argv)
 try:
     from opentelemetry import trace
     from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
     from opentelemetry.sdk.trace import TracerProvider
     from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 
-    _provider = TracerProvider()
-    _provider.add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
-    trace.set_tracer_provider(_provider)
-    _OTELEMETRY_ENABLED = True
-    log.info("OpenTelemetry tracing enabled")
+    if _DISABLE_OTEL:
+        _OTELEMETRY_ENABLED = False
+        log.info("OpenTelemetry tracing disabled for current environment")
+    else:
+        _provider = TracerProvider()
+        _provider.add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
+        trace.set_tracer_provider(_provider)
+        _OTELEMETRY_ENABLED = True
+        log.info("OpenTelemetry tracing enabled")
 except ImportError:
     _OTELEMETRY_ENABLED = False
     log.warning("OpenTelemetry not available, tracing disabled")
