@@ -1,7 +1,12 @@
 from datetime import datetime, timezone
 from typing import List, Dict
 import networkx as nx
-from app.models import ComponentHealth, HealthStatus, SystemHealthStatusResponse, ComponentInput
+from app.models import (
+    ComponentHealth,
+    HealthStatus,
+    SystemHealthStatusResponse,
+    ComponentInput,
+)
 from app.dag import get_dependencies
 
 
@@ -16,17 +21,18 @@ def overall_health(health_state: Dict[str, HealthStatus]) -> HealthStatus:
     else:
         return HealthStatus.HEALTHY
 
+
 def generate_system_health_summary(
-        health_state: Dict[str, HealthStatus], 
-        component_registry: Dict[str, ComponentInput],
-        dag: nx.DiGraph
+    health_state: Dict[str, HealthStatus],
+    component_registry: Dict[str, ComponentInput],
+    dag: nx.DiGraph,
 ) -> SystemHealthStatusResponse:
-    
+
     component_health_priority = {
         HealthStatus.UNHEALTHY: 0,
         HealthStatus.DEGRADED: 1,
         HealthStatus.UNKNOWN: 2,
-        HealthStatus.HEALTHY: 3
+        HealthStatus.HEALTHY: 3,
     }
 
     components: List[ComponentHealth] = []
@@ -37,15 +43,17 @@ def generate_system_health_summary(
         counts[status] += 1
 
         dependencies = get_dependencies(dag, component_id)
-        alert = (status in {HealthStatus.UNHEALTHY, HealthStatus.DEGRADED})
+        alert = status in {HealthStatus.UNHEALTHY, HealthStatus.DEGRADED}
 
-        components.append(ComponentHealth(
-            id=component_id,
-            name=component.name,
-            status=status,
-            dependencies=dependencies,
-            alert=alert
-        ))
+        components.append(
+            ComponentHealth(
+                id=component_id,
+                name=component.name,
+                status=status,
+                dependencies=dependencies,
+                alert=alert,
+            )
+        )
 
     # Sort components by severity (unhealthy first)
     components.sort(key=lambda c: component_health_priority[c.status])
@@ -56,5 +64,5 @@ def generate_system_health_summary(
         evaluatedatetime=datetime.now().astimezone(),
         unhealthy_count=counts[HealthStatus.UNHEALTHY],
         degraded_count=counts[HealthStatus.DEGRADED],
-        healthy_count=counts[HealthStatus.HEALTHY]
+        healthy_count=counts[HealthStatus.HEALTHY],
     )
