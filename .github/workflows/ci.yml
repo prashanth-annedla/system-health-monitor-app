@@ -23,4 +23,5 @@ jobs:
               with:
                 context: .
                 push: false
+                load: true
                 tags: system-health-monitor-app:latest
