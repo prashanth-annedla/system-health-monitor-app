@@ -48,4 +48,4 @@ jobs:
 
             - name: Run tests
               run: |
-                pytest -v tests/ -tb=short
+                pytest -v tests/ --tb=short
