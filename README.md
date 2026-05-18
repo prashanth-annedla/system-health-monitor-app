@@ -1,4 +1,6 @@
-# System Health Monitor
+# System Health Monitor App
+
+![CI](https://github.com/prashanth-annedla/system-health-monitor-app/actions/workflows/ci.yml/badge.svg)
 
 A Python-based system that evaluates the health of distributed system composed of multiple dependent components modelled as a DAG (Directed Acyclic Graph). Supports request driven and event-driven health updates.
 
