@@ -51,6 +51,14 @@ class HealthEvent(BaseModel):
     details: Optional[str] = None
 
 
+class ComponentHealth(BaseModel):
+    id: str
+    name: str
+    status: HealthStatus
+    dependencies: List[str] = []
+    alert: bool = False
+
+
 class SystemHealthStatusResponse(BaseModel):
     overall_status: HealthStatus
     componenets: List[ComponentHealth]
@@ -58,11 +66,3 @@ class SystemHealthStatusResponse(BaseModel):
     unhealthy_count: int = 0
     degraded_count: int = 0
     healthy_count: int = 0
-
-
-class ComponentHealth(BaseModel):
-    id: str
-    name: str
-    status: HealthStatus
-    dependencies: List[str] = []
-    alert: bool = False
