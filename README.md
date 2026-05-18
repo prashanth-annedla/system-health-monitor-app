@@ -24,11 +24,11 @@ A Python-based system that evaluates the health of distributed system composed o
 
 - **FastAPI web API** - Accepts JSON payload describing components and their dependencies
 - **DAG construction and cycle detection** - built with `networkx`. Rejects invalid inputs (unknown dependencies, circular depdencies)
-- **BFS orderedasync health evaluation** - Components are evaluated level by levl using `topological_generations()`. Components within the same level are evaluated concurrently with `asyncio.gather`
+- **BFS ordered async health evaluation** - Components are evaluated level by level using `topological_generations()`. Components within the same level are evaluated concurrently with `asyncio.gather`
 - **Dependency health propagation** - When a component is `unhealthy`, it's direct and transitive dependents are automatically marked as `degraded`
 - **Event-driven health updates** - A background consumer loop reads from an event bus and applies changes
 - **Component Health Status** - `GET /components-status` returns overall system health, per-component status sorted by severity and counts
-- **Promotheus metrics** - exposed at `/metrics` via `promotheus-fastapi-instrumentor`
+- **Prometheus metrics** - exposed at `/metrics` via `prometheus-fastapi-instrumentor`
 - **Structured JSON logging** - used `structlog`
 - **Distributed tracing** - used OpenTelemetry for tracing
 - **Obervability** - `GET /health` for health checks
@@ -44,7 +44,7 @@ A Python-based system that evaluates the health of distributed system composed o
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │                              FastAPI App                                     │
 │                                                                              │
-│  POST /register_component                                                    │
+│  POST /register-component                                                    │
 │            │                                                                 │
 │            ▼                                                                 │
 │     ┌─────────────────────┐                                                  │
@@ -71,29 +71,29 @@ A Python-based system that evaluates the health of distributed system composed o
 │                 ▼                              │                             │
 │      GET /components-status                    │                             │
 │                                                │                             │
-│      POST /events ─────────────────────────────┘                             │
+│      POST /update-metrics ─────────────────────┘                             │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
-**Storage** - In-memory Python dicts (`register_component`, `components_status`)
+**Storage** - In-memory Python dicts (`register-components`, `components-status`)
 
 ---
 
 ## How the DAG is Modelled and Traversed
 
-Components and their dependencies are stored as a `networkx.DiGraph`. A directed edge `A -> B` means "B depends on A" (A musy be healthy for B to be healthy).
+Components and their dependencies are stored as a `networkx.DiGraph`. A directed edge `A -> B` means "B depends on A" (A must be healthy for B to be healthy).
 
 On Registration:
 1. All component IDs are added as nodes.
 2. Dependency edges are validated
 
-For traversal, `nx.topological_generations()` is used. This fives sets of nodes where all nodes in a set have no unresolved prcedecessors which is equivalent to BFS level ordering. 
+For traversal, `nx.topological_generations()` is used. This fives sets of nodes where all nodes in a set have no unresolved predecessors which is equivalent to BFS level ordering. 
 
 ---
 
 ## Async Health Evaluation
 
-health evaluation is triggered as a FastAPI `BackgroundTask` after every `POST /register_component`.
+health evaluation is triggered as a FastAPI `BackgroundTask` after every `POST /register-components`.
 
 1. The graph is split into topological levels.
 2. For each level, `asyncio.gather` fires all health check concurrently.
@@ -109,7 +109,7 @@ on each event,
 
 1. The components status in `health_state` is updated immediately.
 2. `re_evaluate_dependents` performs a BFS from the changed component, propagating `degraded` state to all the transitive dependents.
-3. The overall health can be reflected using `GET /components-health`
+3. The overall health can be reflected using `GET /components-status`
 
 ## How to Run Locally
 
@@ -137,7 +137,7 @@ python -m pytest -q
 Or with Docker:
 
 ```bash
-docker build -t system-health-monitor-app
+docker build -t system-health-monitor-app .
 docker run -p 8000:8000 system-health-monitor-app
 ```
 
@@ -145,7 +145,7 @@ docker run -p 8000:8000 system-health-monitor-app
 
 ```bash
 #1. Register Components
-curl -X POST http://localhost:8000/register_component \
+curl -X POST http://localhost:8000/register-components \
     -H "Content-Type: application/json" \
     -d '{
         "components": [
@@ -174,12 +174,12 @@ curl -X POST http://localhost:8000/update-metrics \
 
 | Method | Path | Description |
 |---|---|---|
-| `POST` | `/register_component` | Register components and trigger health evaluation |
-| `GET` | `/components_health` | Get components health status | 
+| `POST` | `/register-components` | Register components and trigger health evaluation |
+| `GET` | `/components-status` | Get components health status | 
 | `POST` | `/update-metrics` | Inject health event | 
 | `GET` | `/health` | Health check of the application | 
-| `GET` | `/metrics` | Promotheus metrics | 
-| `GET` | `/docs` | Interative swagger UI | 
+| `GET` | `/metrics` | Prometheus metrics | 
+| `GET` | `/docs` | Interactive swagger UI | 
 
 ---
 
@@ -188,7 +188,7 @@ curl -X POST http://localhost:8000/update-metrics \
 | Signal | Implementation |
 |---|---|
 | **Logging** | `structlog` - structured JSON logs with log level and timestamp |
-| **Metrics** | `promotheus-fastapi-instrumentation` - request count, latency, and status codes at `/metrics` |
+| **Metrics** | `prometheus-fastapi-instrumentation` - request count, latency, and status codes at `/metrics` |
 | **Tracing** | OpenTelemetry SDK |
 | **Health endpoint** | `Get /health` returns `{"status": "ok"}` - can be used for application health check status |
 
@@ -209,7 +209,7 @@ curl -X POST http://localhost:8000/update-metrics \
 
 ## Assumptions
 
-- **Messaging** - `asbycio.Queue` is used as the local event bus. We can use something like GCP pub/sub in real world application.
+- **Messaging** - `asyncio.Queue` is used as the local event bus. We can use something like GCP pub/sub in real world application.
 - **Component Health checks** - `_stub_health_check` returns random status. In real world applications, we can hit the actual endpoints and get the status.
-- **Dependency Nodes Health** - In parent is `unhealthy`, all direct children becomes degraded. In real world, it depends on application requirment.
+- **Dependency Nodes Health** - In parent is `unhealthy`, all direct children becomes degraded. In real world, it depends on application requirement.
 - **Storage** - In-memory dicts. Re-registering components overwrites the previous state as random statuses are being calculated.

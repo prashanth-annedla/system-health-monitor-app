@@ -114,7 +114,7 @@ if _OTELEMETRY_ENABLED:
 
 
 @app.post(
-    "/register_component",
+    "/register-components",
     response_model=SystemRegisteredResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Register a new component with its dependencies to trigger health evaluation",
