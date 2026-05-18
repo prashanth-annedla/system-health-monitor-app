@@ -17,6 +17,9 @@ A Python-based system that evaluates the health of distributed system composed o
 - [Infrastructure as Code (IaC)](#infrastructure-as-code-iac)
 - [CI/CD Pipeline](#cicd-pipeline)
 - [Assumptions](#assumptions)
+- [Features Intentionally Excluded](#features-intentionally-excluded)
+- [Design Trade-offs](#design-trade-offs)
+- [AI Tool Usage](#ai-tool-usage)
 
 ---
 
@@ -213,3 +216,31 @@ curl -X POST http://localhost:8000/update-metrics \
 - **Component Health checks** - `_stub_health_check` returns random status. In real world applications, we can hit the actual endpoints and get the status.
 - **Dependency Nodes Health** - In parent is `unhealthy`, all direct children becomes degraded. In real world, it depends on application requirement.
 - **Storage** - In-memory dicts. Re-registering components overwrites the previous state as random statuses are being calculated.
+
+---
+
+## Features Intentionally Excluded
+
+- **persistence / database** - In-memory state is enough to test the application. Adding database would make this complex and not much useful for the excerise.
+- **Authentication / authorization** - Out of scope. For production application, we can use API keys.
+- **Component Health Checks** - Stub component health checks, Production application would call the actual application health check endpoints.
+
+---
+
+## Design Trade-offs
+
+- `asyncio.Queue` as event bus since it has not other external dependencies and easy to test locally. It's not durable since events are lost on restart and cannot be share in multi instance scenario.
+- In memory state dicts - Fast reads, no external dependencies. State is lost on restarts.
+- Stub health checks - good for local testing without real infrastructure.
+
+---
+
+## AI Tool Usage
+
+Github Copilot (Claude Haiku 4.5) was used for development
+
+- Scaffold FastAPI route handlers, Pydantic models, and async patterns.
+- Generating the `re-evaluate-dependents` BFS logic
+- Drafting terraform code.
+- Creating the tests
+- Generated partial content of README file.
