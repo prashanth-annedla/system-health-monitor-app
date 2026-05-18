@@ -47,7 +47,7 @@ A Python-based system that evaluates the health of distributed system composed o
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │                              FastAPI App                                     │
 │                                                                              │
-│  POST /register-component                                                    │
+│  POST /register-components                                                    │
 │            │                                                                 │
 │            ▼                                                                 │
 │     ┌─────────────────────┐                                                  │
