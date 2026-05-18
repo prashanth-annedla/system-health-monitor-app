@@ -231,3 +231,13 @@ async def update_metrics(event: HealthEvent) -> dict:
         "component_id": event.component_id,
         "new_status": event.status,
     }
+
+
+@app.get(
+    "/health", 
+    summary="Health check endpoint for monitoring the health of this service", 
+    tags=["Monitoring"])
+async def health_check() -> dict:
+    """Health check endpoint to verify that the System Health Monitor service is running and responsive. This can be used by monitoring tools to check the health of this service itself."""
+    return {"status": "ok"}
+
