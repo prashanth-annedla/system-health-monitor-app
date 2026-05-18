@@ -47,7 +47,7 @@ A Python-based system that evaluates the health of distributed system composed o
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │                              FastAPI App                                     │
 │                                                                              │
-│  POST /register-components                                                    │
+│  POST /register-components                                                   │
 │            │                                                                 │
 │            ▼                                                                 │
 │     ┌─────────────────────┐                                                  │
@@ -130,6 +130,8 @@ source venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app
 ```
+
+Once above commands are executed, browse the interactive API docs at: http://localhost:8000/docs
 
 Run tests:
 
