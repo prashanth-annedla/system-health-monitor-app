@@ -31,7 +31,7 @@ A Python-based system that evaluates the health of distributed system composed o
 - **Prometheus metrics** - exposed at `/metrics` via `prometheus-fastapi-instrumentor`
 - **Structured JSON logging** - used `structlog`
 - **Distributed tracing** - used OpenTelemetry for tracing
-- **Obervability** - `GET /health` for health checks
+- **Observability** - `GET /health` for health checks
 - **Dockerfile** - container image for deployment
 - **Terraform IaC** - Sample Terraform Code for GCP. *Not tested*
 - **GitHub Actions CI/CD** - Build, Test and Deploy jobs
@@ -87,7 +87,7 @@ On Registration:
 1. All component IDs are added as nodes.
 2. Dependency edges are validated
 
-For traversal, `nx.topological_generations()` is used. This fives sets of nodes where all nodes in a set have no unresolved predecessors which is equivalent to BFS level ordering. 
+For traversal, `nx.topological_generations()` is used. This gives sets of nodes where all nodes in a set have no unresolved predecessors which is equivalent to BFS level ordering. 
 
 ---
 
@@ -103,7 +103,7 @@ health evaluation is triggered as a FastAPI `BackgroundTask` after every `POST /
 
 ## Event-Driven Health Updates
 
-A persistent background `asyncio.Task` runs `event_bus.consume()` for the lifetime fo the application. 
+A persistent background `asyncio.Task` runs `event_bus.consume()` for the lifetime of the application. 
 
 on each event,
 

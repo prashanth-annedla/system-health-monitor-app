@@ -28,7 +28,7 @@ def test_register_component_endpoint(monkeypatch):
         ]
     }
 
-    response = client.post("/register_component", json=payload)
+    response = client.post("/register-components", json=payload)
 
     assert response.status_code == 201
     body = response.json()
@@ -52,7 +52,7 @@ def test_update_metrics_endpoint(monkeypatch):
         ]
     }
 
-    register_response = client.post("/register_component", json=register_payload)
+    register_response = client.post("/register-components", json=register_payload)
     assert register_response.status_code == 201
 
     event_payload = {
