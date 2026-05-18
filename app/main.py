@@ -176,14 +176,14 @@ async def _run_evaluation() -> None:
 
 
 @app.get(
-    "/health-status",
+    "/components-status",
     response_model=SystemHealthStatusResponse,
-    summary="Get the current health status of all components in the system",
-    tags=["Health Status"],
+    summary="Get the current components status for all registered components",
+    tags=["Components Status"],
 )
-async def get_health_status() -> SystemHealthStatusResponse:
+async def get_components_status() -> SystemHealthStatusResponse:
     """
-    Retrieve the current health status of all registered components in the system. The response includes the overall system health status, individual component statuses, and counts of healthy, degraded, and unhealthy components.
+    Retrieve the current components status for all registered components in the system. The response includes the overall system health status, individual component statuses, and counts of healthy, degraded, and unhealthy components.
     """
     if not dag:
         raise HTTPException(
